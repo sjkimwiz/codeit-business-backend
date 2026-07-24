@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int     @id @default(autoincrement())
+  email        String  @unique
+  password     String?
+  username     String
+  googleId     String? @unique
+  refreshToken String? @unique
+
+  articles          Article[]
+  recommendArticles UserRecommendArticle[]
+}
+
+model Article {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  userId    Int
+
+  // onDelete 옵션
+  // 1. Restict: 게시글이 남아있다면 유저 삭제 불가
+  // 2. Cascade: 유저가 삭제되면 게시글도 삭제된다.
+  // 3. SetNull: 유저가 삭제되어도 게시글이 남아있고 userId = null로 변경된다.
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recommendedBy UserRecommendArticle[]
+}
+
+model UserRecommendArticle {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  articleId Int
+  createdAt DateTime @default(now())
+
+  // 한 유저가 같은 게시글을 중복 추천할 수 없다.
+  @@unique([userId, articleId])
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+}
