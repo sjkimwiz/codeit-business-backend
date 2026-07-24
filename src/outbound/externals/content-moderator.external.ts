@@ -13,7 +13,7 @@ export const createContentModerator = (client: OpenAI): IContentModerator => {
     // return response.results[0]?.flagged ?? false;
 
     // api 키 미발급으로 아직 적용되지 않습니다
-    return false;
+    return true;
   };
 
   return { isInappropriate };
